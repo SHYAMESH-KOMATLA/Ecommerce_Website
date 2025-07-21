@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAASH - Orders</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <ul class="nav-links">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html" class="active">Orders</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="orders">
+        <h2>Your Orders</h2>
+        <div id="order-list" class="order-list"></div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Chat</h3>
+                <ul>
+                    <li><a href="#" id="chatLink">Chat with Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Address</h3>
+                <p>123, RAASH Street, E-Commerce City, Country</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="chatModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('chatModal').style.display='none'">×</span>
+            <h3>Chat with Support</h3>
+            <div id="chatBox"></div>
+            <input type="text" id="chatInput" placeholder="Type your message...">
+            <button id="sendChat">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+
+            document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        });
+
+        function loadOrders() {
+            fetch(`${BASE_URL}/api/orders`, {
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            throw new Error('Not authenticated');
+                        }
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    const orderList = document.getElementById('order-list');
+                    if (orders.length === 0) {
+                        orderList.innerHTML = '<p>No orders found.</p>';
+                        return;
+                    }
+                    orderList.innerHTML = orders.map(order => `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <h3>Order #${order.order_id || order.id}</h3>
+                                <div class="order-status">
+                                    <p>Status: <span class="status-badge ${order.status.toLowerCase()}">${order.status}</span></p>
+                                    <p>Total: ₹${order.total.toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div class="order-products">
+                                ${order.products.map(p => `
+                                    <div class="order-product">
+                                        <img src="${p.image_path}" alt="${p.name}">
+                                        <div class="product-details">
+                                            <h4>${p.name}</h4>
+                                            <p>₹${p.unit_price.toFixed(2)} x ${p.quantity}</p>
+                                            <small>${p.description}</small>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    const orderList = document.getElementById('order-list');
+                    if (error.message === 'Not authenticated') {
+                        orderList.innerHTML = '<p>Please log in to view your orders.</p>';
+                        setTimeout(() => {
+                            window.location.href = '/login.html';
+                        }, 2000);
+                    } else {
+                        orderList.innerHTML = '<p>Error loading orders.</p>';
+                    }
+                });
+        }
+
+        function logout(e) {
+            e.preventDefault();
+            fetch(`${BASE_URL}/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = '/login.html';
+                    } else {
+                        alert(data.error || 'Logout failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    alert('Error logging out');
+                });
+        }
+
+        // Chat functionality
+        let chatMessages = [];
+        function addChatMessage(message, isUser = false) {
+            chatMessages.push({ text: message, isUser });
+            updateChatDisplay();
+        }
+
+        function updateChatDisplay() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = chatMessages.map(msg => `
+                <div class="chat-message ${msg.isUser ? 'user-message' : 'bot-message'}">
+                    ${msg.text}
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('chatLink')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('chatModal').style.display = 'block';
+        });
+
+        document.getElementById('sendChat')?.addEventListener('click', () => {
+            const input = document.getElementById('chatInput').value.trim();
+            if (input) {
+                addChatMessage(input, true);
+                document.getElementById('chatInput').value = '';
+                setTimeout(() => {
+                    const responses = [
+                        "Your order #1234 is being processed.",
+                        "Payment for order #5678 was successful!",
+                        "We offer 24/7 support on RAASH.",
+                        "Check out our new arrivals in the Mobiles category!",
+                        "Contact us at support@raash.com for more help."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addChatMessage(randomResponse, false);
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

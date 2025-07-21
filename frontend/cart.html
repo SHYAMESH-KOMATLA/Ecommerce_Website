@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAASH - Cart</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <ul class="nav-links">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="cart.html" class="active">Cart</a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="cart">
+        <h2>Your Cart</h2>
+        <div class="cart-container">
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping:</span>
+                    <span id="shipping">₹10.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">₹100.00</span>
+                </div>
+                <button id="checkout-btn" class="checkout-btn">Proceed to Checkout</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="homepage.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="orders.html">Orders</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: support@raash.com</p>
+                <p>Phone: +1-800-RAASH-01</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/check-auth', { credentials: 'include' });
+                const data = await response.json();
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const adminBtn = document.getElementById('adminBtn');
+                loginBtn.style.display = data.authenticated ? 'none' : 'inline-block';
+                logoutBtn.style.display = data.authenticated ? 'inline-block' : 'none';
+                adminBtn.style.display = data.authenticated && data.user_type === 'admin' ? 'inline-block' : 'none';
+                return data.authenticated;
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                return false;
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('adminBtn').style.display = 'none';
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+
+            loadCart();
+            document.getElementById('checkout-btn').addEventListener('click', async () => {
+                const isAuthenticated = await checkAuthStatus();
+                if (!isAuthenticated) {
+                    alert('Please login to proceed to checkout!');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                window.location.href = '/checkout.html';
+            });
+        });
+
+        function loadCart() {
+            fetch('/api/cart', { credentials: 'include' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(cart => {
+                    const container = document.getElementById('cart-items');
+                    let subtotal = 0;
+
+                    if (cart.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-cart">
+                                <p>Your cart is empty</p>
+                                <a href="products.html" class="shop-btn">Shop Now</a>
+                            </div>
+                        `;
+                        // Hide checkout button when cart is empty
+                        document.getElementById('checkout-btn').style.display = 'none';
+                        updateSummary(0);
+                        return;
+                    }
+
+                    // Show checkout button when cart has items
+                    document.getElementById('checkout-btn').style.display = 'block';
+
+                    container.innerHTML = cart.map(item => {
+                        subtotal += item.price * item.quantity;
+                        return `
+                            <div class="cart-item" data-id="${item.product_id}">
+                                <img src="${item.image_path}" alt="${item.name}">
+                                <div class="item-details">
+                                    <h3>${item.name}</h3>
+                                    <p class="price">₹${item.price.toFixed(2)}</p>
+                                    <div class="quantity-controls">
+                                        <button class="quantity-btn" data-id="${item.product_id}" data-action="decrease">-</button>
+                                        <span class="quantity-value">${item.quantity}</span>
+                                        <button class="quantity-btn" data-id="${item.product_id}" data-action="increase">+</button>
+                                        <button class="remove-btn" data-id="${item.product_id}">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    updateSummary(subtotal);
+
+                    document.querySelectorAll('.quantity-btn').forEach(btn => {
+                        btn.addEventListener('click', updateQuantity);
+                    });
+
+                    document.querySelectorAll('.remove-btn').forEach(btn => {
+                        btn.addEventListener('click', removeItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading cart:', error);
+                    document.getElementById('cart-items').innerHTML = '<p>Error loading cart.</p>';
+                    if (error.message.includes('Not authenticated')) {
+                        window.location.href = '/login.html';
+                    }
+                });
+        }
+
+        function updateQuantity(e) {
+            const productId = e.target.getAttribute('data-id');
+            const action = e.target.getAttribute('data-action');
+            
+            fetch('/api/cart/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ product_id: productId, action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCart();
+                } else {
+                    alert(data.error || 'Error updating cart');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function removeItem(e) {
+            const productId = e.target.getAttribute('data-id');
+            const cartItem = e.target.closest('.cart-item');
+            
+            fetch('/api/cart/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ product_id: productId, action: 'decrease', forceRemove: true })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cartItem.remove();
+                    // Check if this was the last item
+                    if (document.querySelectorAll('.cart-item').length === 0) {
+                        document.getElementById('cart-items').innerHTML = `
+                            <div class="empty-cart">
+                                <p>Your cart is empty</p>
+                                <a href="products.html" class="shop-btn">Shop Now</a>
+                            </div>
+                        `;
+                        document.getElementById('checkout-btn').style.display = 'none';
+                        updateSummary(0);
+                    } else {
+                        // Recalculate subtotal if there are remaining items
+                        let newSubtotal = 0;
+                        document.querySelectorAll('.cart-item').forEach(item => {
+                            const price = parseFloat(item.querySelector('.price').textContent.replace('₹', ''));
+                            const quantity = parseInt(item.querySelector('.quantity-value').textContent);
+                            newSubtotal += price * quantity;
+                        });
+                        updateSummary(newSubtotal);
+                    }
+                } else {
+                    alert(data.error || 'Error removing item');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function updateSummary(subtotal) {
+            const shipping = 100.00;
+            document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('total').textContent = `₹${(subtotal + shipping).toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>

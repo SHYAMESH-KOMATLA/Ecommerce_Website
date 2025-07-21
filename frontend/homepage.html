@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAASH - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search products...">
+                <button type="submit" id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="cart.html">Cart<span id="cart-count" class="cart-count"></span></a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="slideshow-container">
+            <video autoplay muted loop class="hero-video">
+                <source src="images/Delivery.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="hero-content">
+                <h1>Shop Smart, Live Better</h1>
+                <p>Find the best deals on top-quality products at unbeatable prices.</p>
+                <a href="products.html" class="shop-now-btn">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="top-categories">
+        <div class="section-title">
+            <h2>Top Categories</h2>
+            <p>Shop from our most popular collections</p>
+        </div>
+        <div class="category-grid">
+            <div class="category">
+                <img src="images/mobiles/mobiles1.jpg" alt="Mobiles">
+                <div class="category-content">
+                    <p>Mobiles</p>
+                    <a href="products-listing.html?category=mobiles" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/sportsshoes/sportsshoes1.jpg.webp" alt="Sports Shoes">
+                <div class="category-content">
+                    <p>Sports Shoes</p>
+                    <a href="products-listing.html?category=sportsshoes" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/laptops/laptops1.jpg" alt="Laptops">
+                <div class="category-content">
+                    <p>Laptops</p>
+                    <a href="products-listing.html?category=laptops" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/watches/watch1.jpg" alt="Watches">
+                <div class="category-content">
+                    <p>Watches</p>
+                    <a href="products-listing.html?category=watches" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/mixers/mixers1.jpg.webp" alt="Mixers">
+                <div class="category-content">
+                    <p>Mixers</p>
+                    <a href="products-listing.html?category=mixers" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/perfumes/perfumes1.jpg" alt="Perfumes">
+                <div class="category-content">
+                    <p>Perfumes</p>
+                    <a href="products-listing.html?category=perfumes" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/sunglasses/sunglasses1.jpg" alt="Sunglasses">
+                <div class="category-content">
+                    <p>Sunglasses</p>
+                    <a href="products-listing.html?category=sunglasses" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/t-shirts/t-shirt1.jpg" alt="T-Shirts">
+                <div class="category-content">
+                    <p>T-Shirts</p>
+                    <a href="products-listing.html?category=tshirts" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/bags/bags1.jpg" alt="Bags">
+                <div class="category-content">
+                    <p>Bags</p>
+                    <a href="products-listing.html?category=bags" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/earbuds/earbuds1.jpg" alt="Earbuds">
+                <div class="category-content">
+                    <p>Earbuds</p>
+                    <a href="products-listing.html?category=earbuds" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/fitness/fitness1.jpg" alt="Fitness">
+                <div class="category-content">
+                    <p>Fitness</p>
+                    <a href="products-listing.html?category=fitness" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+            <div class="category">
+                <img src="images/gifts/gifts1.jpg" alt="Gifts">
+                <div class="category-content">
+                    <p>Gifts</p>
+                    <a href="products-listing.html?category=gifts" class="shop-now-btn">Shop Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="advertisement">
+        <div class="ad-content">
+            <h2>Special Offer!</h2>
+            <p>Get 20% off on your first order. Use code: <span>RAASH20</span></p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Chat</h3>
+                <ul>
+                    <li><a href="#" id="chatLink">Chat with Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Address</h3>
+                <p>123, RAASH Street, E-Commerce City, Country</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="chatModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('chatModal').style.display='none'">×</span>
+            <h3>Chat with Support</h3>
+            <div id="chatBox"></div>
+            <input type="text" id="chatInput" placeholder="Type your message...">
+            <button id="sendChat">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/check-auth', { credentials: 'include' });
+                const data = await response.json();
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const adminBtn = document.getElementById('adminBtn');
+                loginBtn.style.display = data.authenticated ? 'none' : 'inline-block';
+                logoutBtn.style.display = data.authenticated ? 'inline-block' : 'none';
+                adminBtn.style.display = data.authenticated && data.user_type === 'admin' ? 'inline-block' : 'none';
+                updateCartCount();
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('adminBtn').style.display = 'none';
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        async function updateCartCount() {
+            try {
+                const response = await fetch('/api/cart', { credentials: 'include' });
+                if (response.ok) {
+                    const cart = await response.json();
+                    const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+                    document.getElementById('cart-count').textContent = cartCount > 0 ? cartCount : '';
+                }
+            } catch (error) {
+                console.error('Error updating cart count:', error);
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (searchTerm) {
+                window.location.href = `products-listing.html?search=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        document.getElementById('chatLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('chatModal').style.display = 'block';
+        });
+
+        checkAuthStatus();
+        setInterval(updateCartCount, 30000);
+
+        let chatMessages = [];
+        function addChatMessage(message, isUser = false) {
+            chatMessages.push({ text: message, isUser });
+            updateChatDisplay();
+        }
+
+        function updateChatDisplay() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = chatMessages.map(msg => `
+                <div class="chat-message ${msg.isUser ? 'user-message' : 'bot-message'}">
+                    ${msg.text}
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('sendChat').addEventListener('click', () => {
+            const input = document.getElementById('chatInput').value.trim();
+            if (input) {
+                addChatMessage(input, true);
+                document.getElementById('chatInput').value = '';
+                setTimeout(() => {
+                    const responses = [
+                        "Your order #1234 is being processed.",
+                        "Payment for order #5678 was successful!",
+                        "We offer 24/7 support on RAASH.",
+                        "Check out our new arrivals in the Mobiles category!",
+                        "Contact us at support@raash.com for more help."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addChatMessage(randomResponse, false);
+                }, 1000);
+            }
+        });
+
+        // Animation for hero content visibility
+        const heroContent = document.querySelector('.hero-content');
+        function toggleHeroContent() {
+            heroContent.style.opacity = '0';
+            setTimeout(() => {
+                heroContent.style.opacity = '1';
+            }, 1800); // Show after 1.8 seconds
+            setTimeout(() => {
+                heroContent.style.opacity = '0';
+            }, 10800); // Hide after 9 seconds (1.8s delay + 9s visible = 10.8s)
+        }
+
+        // Run the animation every 12 seconds (1.8s delay + 9s visible + 1.2s break)
+        toggleHeroContent(); // Initial call
+        setInterval(toggleHeroContent, 12000);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930d984949097bb1',t:'MTc0NDc0MjY3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93258ea19ae232ec',t:'MTc0NDk5MzkzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

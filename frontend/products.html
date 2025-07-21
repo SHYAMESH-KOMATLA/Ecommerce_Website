@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - RAASH</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <ul class="nav-links">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="products.html" class="active">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="products">
+        <h2 id="page-title">All Products</h2>
+        <div class="product-filters">
+            <div class="filter-section">
+                <select id="category-filter" class="filter-dropdown">
+                    <option value="">All Categories</option>
+                    <option value="mobiles">Mobiles</option>
+                    <option value="sportsshoes">Sports Shoes</option>
+                    <option value="laptops">Laptops</option>
+                    <option value="watches">Watches</option>
+                    <option value="mixers">Mixers</option>
+                    <option value="perfumes">Perfumes</option>
+                    <option value="sunglasses">Sunglasses</option>
+                    <option value="tshirts">T-Shirts</option>
+                    <option value="bags">Bags</option>
+                    <option value="earbuds">Earbuds</option>
+                    <option value="fitness">Fitness</option>
+                    <option value="gifts">Gifts</option>
+                </select>
+            </div>
+            <div class="filter-section">
+                <select id="sort-by" class="filter-dropdown">
+                    <option value="default">Featured</option>
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="price_asc">Price (Low to High)</option>
+                    <option value="price_desc">Price (High to Low)</option>
+                </select>
+            </div>
+            <div class="filter-section">
+                <input type="text" id="search-input" placeholder="Search products..." class="filter-dropdown">
+            </div>
+            <div class="filter-section">
+                <div class="price-range">
+                    <label for="price-range">Price Range:</label>
+                    <input type="range" id="price-range" min="0" max="10000" value="10000" step="50">
+                    <span id="price-value">Up to ₹10000</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="product-grid" class="product-grid"></div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Chat</h3>
+                <ul>
+                    <li><a href="#" id="chatLink">Chat with Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Address</h3>
+                <p>123, RAASH Street, E-Commerce City, Country</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="chatModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('chatModal').style.display='none'">×</span>
+            <h3>Chat with Support</h3>
+            <div id="chatBox"></div>
+            <input type="text" id="chatInput" placeholder="Type your message...">
+            <button id="sendChat">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/check-auth', { credentials: 'include' });
+                const data = await response.json();
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const adminBtn = document.getElementById('adminBtn');
+                loginBtn.style.display = data.authenticated ? 'none' : 'inline-block';
+                logoutBtn.style.display = data.authenticated ? 'inline-block' : 'none';
+                adminBtn.style.display = data.authenticated && data.user_type === 'admin' ? 'inline-block' : 'none';
+                return data.authenticated;
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                return false;
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('adminBtn').style.display = 'none';
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+
+            fetch('/api/products', { credentials: 'include' })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(products => {
+                    const grid = document.getElementById('product-grid');
+                    if (!grid) {
+                        console.error('Product grid element not found!');
+                        return;
+                    }
+                    if (products.length === 0) {
+                        grid.innerHTML = '<p>No products available.</p>';
+                        return;
+                    }
+                    grid.innerHTML = products.map(product => `
+                        <div class="product-card" data-category="${product.category || 'uncategorized'}">
+                            <img src="${product.image_path || 'images/default.jpg'}" alt="${product.name || 'Product'}">
+                            <h3>${product.name || 'Unnamed Product'}</h3>
+                            <p class="product-description">${product.description || 'No description'}</p>
+                            <p class="price">₹${product.price ? product.price.toFixed(2) : '0.00'}</p>
+                            <div class="product-actions">
+                                <button class="buy-now-btn" data-id="${product.id || 0}">Buy Now</button>
+                                <button class="add-to-cart-btn" data-id="${product.id || 0}">Add to Cart</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    const categoryFilter = document.getElementById('category-filter');
+                    const sortBy = document.getElementById('sort-by');
+                    const searchInput = document.getElementById('search-input');
+                    const priceRange = document.getElementById('price-range');
+                    const priceValue = document.getElementById('price-value');
+                    const allProductCards = document.querySelectorAll('.product-card');
+
+                    priceRange.addEventListener('input', function() {
+                        priceValue.textContent = `Up to ₹${this.value}`;
+                        filterProducts();
+                    });
+
+                    function filterProducts() {
+                        const selectedCategory = categoryFilter.value;
+                        const sortValue = sortBy.value;
+                        const searchQuery = searchInput.value.toLowerCase();
+                        const maxPrice = parseInt(priceRange.value);
+
+                        allProductCards.forEach(product => {
+                            const category = product.dataset.category;
+                            const name = product.querySelector('h3').textContent.toLowerCase();
+                            const price = parseFloat(product.querySelector('.price').textContent.replace('₹', '')) || 0;
+                            const matchesCategory = selectedCategory === '' || category === selectedCategory;
+                            const matchesSearch = name.includes(searchQuery);
+                            const matchesPrice = price <= maxPrice;
+
+                            product.style.display = matchesCategory && matchesSearch && matchesPrice ? 'block' : 'none';
+                        });
+
+                        if (sortValue !== 'default') {
+                            const productGrid = document.getElementById('product-grid');
+                            const products = Array.from(allProductCards);
+                            
+                            products.sort((a, b) => {
+                                const aName = a.querySelector('h3').textContent;
+                                const bName = b.querySelector('h3').textContent;
+                                const aPrice = parseFloat(a.querySelector('.price').textContent.replace('₹', '')) || 0;
+                                const bPrice = parseFloat(b.querySelector('.price').textContent.replace('₹', '')) || 0;
+                                
+                                switch(sortValue) {
+                                    case 'name_asc': return aName.localeCompare(bName);
+                                    case 'name_desc': return bName.localeCompare(aName);
+                                    case 'price_asc': return aPrice - bPrice;
+                                    case 'price_desc': return bPrice - aPrice;
+                                    default: return 0;
+                                }
+                            });
+                            
+                            products.forEach(product => productGrid.appendChild(product));
+                        }
+                    }
+
+                    categoryFilter.addEventListener('change', filterProducts);
+                    sortBy.addEventListener('change', filterProducts);
+                    searchInput.addEventListener('input', filterProducts);
+
+                    categoryFilter.addEventListener('change', function() {
+                        if (this.value) {
+                            document.querySelector('.product-filters').style.display = 'flex';
+                            filterProducts();
+                        }
+                    });
+
+                    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                        button.addEventListener('click', async function() {
+                            const isAuthenticated = await checkAuthStatus();
+                            if (!isAuthenticated) {
+                                alert('Please login to add items to cart!');
+                                window.location.href = '/login.html';
+                                return;
+                            }
+                            const productId = this.getAttribute('data-id');
+                            fetch('/api/cart/update', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ product_id: productId, action: 'increase' }),
+                                credentials: 'include'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) alert('Added to cart!');
+                                else alert(data.error || 'Failed to add to cart.');
+                            })
+                            .catch(error => console.error('Error adding to cart:', error));
+                        });
+                    });
+
+                    document.querySelectorAll('.buy-now-btn').forEach(button => {
+                        button.addEventListener('click', async function() {
+                            const isAuthenticated = await checkAuthStatus();
+                            if (!isAuthenticated) {
+                                alert('Please login to buy items!');
+                                window.location.href = '/login.html';
+                                return;
+                            }
+                            const productId = this.getAttribute('data-id');
+                            window.location.href = `checkout.html?product=${productId}`;
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                    const grid = document.getElementById('product-grid');
+                    if (grid) grid.innerHTML = `<p>Error loading products. Please try again later. (Details: ${error.message})</p>`;
+                });
+        });
+
+        // Chat functionality
+        let chatMessages = [];
+        function addChatMessage(message, isUser = false) {
+            chatMessages.push({ text: message, isUser });
+            updateChatDisplay();
+        }
+
+        function updateChatDisplay() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = chatMessages.map(msg => `
+                <div class="chat-message ${msg.isUser ? 'user-message' : 'bot-message'}">
+                    ${msg.text}
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('chatLink')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('chatModal').style.display = 'block';
+        });
+
+        document.getElementById('sendChat')?.addEventListener('click', () => {
+            const input = document.getElementById('chatInput').value.trim();
+            if (input) {
+                addChatMessage(input, true);
+                document.getElementById('chatInput').value = '';
+                setTimeout(() => {
+                    const responses = [
+                        "Your order #1234 is being processed.",
+                        "Payment for order #5678 was successful!",
+                        "We offer 24/7 support on RAASH.",
+                        "Check out our new arrivals in the Mobiles category!",
+                        "Contact us at support@raash.com for more help."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addChatMessage(randomResponse, false);
+                }, 1000);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9325d15b7fdc53c0',t:'MTc0NDk5NjY2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

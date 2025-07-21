@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - RAASH</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <label for="full_name">Full Name:</label>
+            <input type="text" id="full_name" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" minlength="8" required>
+            <button type="submit">Register</button>
+        </form>
+        <p id="registerMessage"></p>
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+
+    <script>
+        const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+
+        document.getElementById("registerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const full_name = document.getElementById("full_name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!full_name || !email || !password) {
+                showMessage("All fields are required.", "error");
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage("Password must be at least 8 characters.", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ full_name, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage(data.message, "success");
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1500);
+                } else {
+                    showMessage(data.error, "error");
+                }
+            } catch (error) {
+                showMessage("Network error. Please try again.", "error");
+                console.error("Error:", error);
+            }
+        });
+
+        function showMessage(message, type) {
+            const messageElement = document.getElementById("registerMessage");
+            messageElement.textContent = message;
+            messageElement.className = type;
+        }
+    </script>
+</body>
+</html>

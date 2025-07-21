@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - RAASH</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <ul class="nav-links">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="checkout">
+        <h2>Payment</h2>
+        <div id="selected-product"></div>
+        <div class="checkout-summary">
+            <h3>Shipping Information</h3>
+            <form id="paymentForm">
+                <label for="address">Address:</label>
+                <textarea id="address" required placeholder="Enter your full address"></textarea>
+                <label for="payment-method">Payment Method:</label>
+                <select id="payment-method" required>
+                    <option value="cash-on-delivery">Cash on Delivery</option>
+                    <option value="credit card">credit card</option>
+                    <option value="upi">upi</option>
+                </select>
+                <button type="submit" class="checkout-btn">order Now</button>
+            </form>
+            <p id="paymentMessage"></p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Help</h3>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Address</h3>
+                <p>123, RAASH Street, E-Commerce City, Country</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/check-auth', { credentials: 'include' });
+                const data = await response.json();
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const adminBtn = document.getElementById('adminBtn');
+                loginBtn.style.display = data.authenticated ? 'none' : 'inline-block';
+                logoutBtn.style.display = data.authenticated ? 'inline-block' : 'none';
+                adminBtn.style.display = data.authenticated && data.user_type === 'admin' ? 'inline-block' : 'none';
+                return { authenticated: data.authenticated, userId: data.user_id };
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                return { authenticated: false, userId: null };
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('adminBtn').style.display = 'none';
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const { authenticated, userId } = await checkAuthStatus();
+            if (!authenticated) {
+                alert('Please login to proceed with payment!');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('product');
+
+            let products = [];
+            let subtotal = 0;
+
+            if (productId) {
+                await fetch(`/api/products?id=${productId}`, { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            products = [{ ...data[0], quantity: 1 }];
+                            subtotal = data[0].price;
+                            document.getElementById('selected-product').innerHTML = `
+                                <div class="checkout-item selected-product">
+                                    <img src="${data[0].image_path || 'images/default.jpg'}" alt="${data[0].name}">
+                                    <div class="item-details">
+                                        <h3>${data[0].name}</h3>
+                                        <p>${data[0].description || 'No description'}</p>
+                                        <p>₹${data[0].price.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching product:', error));
+            } else {
+                await fetch('/api/cart', { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(cart => {
+                        products = cart.map(item => ({ ...item, name: item.name, price: item.price }));
+                        subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                        document.getElementById('selected-product').innerHTML = cart.map(item => `
+                            <div class="checkout-item selected-product">
+                                <img src="${item.image_path}" alt="${item.name}">
+                                <div class="item-details">
+                                    <h3>${item.name}</h3>
+                                    <p>₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                    })
+                    .catch(error => console.error('Error loading cart:', error));
+            }
+
+            const shipping = 100.00;
+            const total = subtotal + shipping;
+
+            const paymentForm = document.getElementById('paymentForm');
+            const paymentMessage = document.getElementById('paymentMessage');
+
+            paymentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const address = document.getElementById('address').value.trim();
+                const paymentMethod = document.getElementById('payment-method').value;
+
+                if (!address || !paymentMethod) {
+                    paymentMessage.textContent = 'Please fill all fields.';
+                    paymentMessage.className = 'error';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/payments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ products, subtotal, shipping, total, payment_method: paymentMethod, address })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        paymentMessage.textContent = 'Order placed successfully! Receipt sent to your email.';
+                        paymentMessage.className = 'success';
+
+                        setTimeout(() => {
+                            window.location.href = '/orders.html';
+                        }, 2000);
+                    } else {
+                        paymentMessage.textContent = data.error || 'Failed to place order.';
+                        paymentMessage.className = 'error';
+                    }
+                } catch (error) {
+                    paymentMessage.textContent = 'Network error. Please try again.';
+                    paymentMessage.className = 'error';
+                    console.error('Error:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

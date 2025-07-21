@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - RAASH</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"><img src="images/logo.png" alt="RAASH Logo"></div>
+            <ul class="nav-links">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="admin.html" id="adminBtn" class="login-btn" style="display: none;">Admin</a></li>
+                <li id="authButtonContainer">
+                    <a href="login.html" id="loginBtn" class="login-btn">Login</a>
+                    <a href="#" id="logoutBtn" class="login-btn" style="display: none;">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="checkout">
+        <h2 class="checkout-title">Checkout</h2>
+        <div class="selected-product-large">
+            <div id="selected-product" class="animated-fade-in"></div>
+        </div>
+        <div class="related-products-section">
+            <h3 class="section-title animated-slide-up">Related Products</h3>
+            <div id="related-products" class="product-grid animated-grid"></div>
+        </div>
+        <div class="checkout-summary animated-slide-in">
+            <h3 class="summary-title">Order Summary</h3>
+            <table class="payment-table">
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                    <td>Subtotal</td>
+                    <td id="subtotal">₹0.00</td>
+                </tr>
+                <tr>
+                    <td>Shipping</td>
+                    <td id="shipping">₹10.00</td>
+                </tr>
+                <tr class="total-row">
+                    <td>Total</td>
+                    <td id="total">₹100.00</td>
+                </tr>
+            </table>
+            <button id="place-order-btn" class="checkout-btn animated-pulse">Proceed to Payment</button>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>RAASH is your one-stop e-commerce platform for all your shopping needs.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Help</h3>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://linkedin.com" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Address</h3>
+                <p>123, RAASH Street, E-Commerce City, Country</p>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 RAASH. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/check-auth', { credentials: 'include' });
+                const data = await response.json();
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const adminBtn = document.getElementById('adminBtn');
+                loginBtn.style.display = data.authenticated ? 'none' : 'inline-block';
+                logoutBtn.style.display = data.authenticated ? 'inline-block' : 'none';
+                adminBtn.style.display = data.authenticated && data.user_type === 'admin' ? 'inline-block' : 'none';
+                return data.authenticated;
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                return false;
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', { method: 'POST', credentials: 'include' });
+                if (response.ok) {
+                    document.getElementById('loginBtn').style.display = 'inline-block';
+                    document.getElementById('logoutBtn').style.display = 'none';
+                    document.getElementById('adminBtn').style.display = 'none';
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let productId = urlParams.get('product');
+
+            async function loadProduct(productId) {
+                const isAuthenticated = await checkAuthStatus();
+                if (!isAuthenticated) {
+                    alert('Please login to proceed with checkout!');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                fetch(`/api/products?id=${productId}`, { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(products => {
+                        if (products.length > 0) {
+                            const product = products[0];
+                            document.getElementById('selected-product').innerHTML = `
+                                <div class="checkout-item selected-product">
+                                    <img src="${product.image_path || 'images/default.jpg'}" alt="${product.name}">
+                                    <div class="item-details">
+                                        <h3>${product.name}</h3>
+                                        <p>${product.description || 'No description'}</p>
+                                        <p>₹${product.price.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            `;
+                            updateSummary(product.price);
+
+                            const category = product.category || 'mobiles';
+                            fetch(`/api/products/category/${category}`, { credentials: 'include' })
+                                .then(response => response.json())
+                                .then(relatedProducts => {
+                                    const filteredRelated = relatedProducts.filter(p => p.id != productId).slice(0, 4);
+                                    const relatedGrid = document.getElementById('related-products');
+                                    relatedGrid.innerHTML = filteredRelated.map(p => `
+                                        <div class="product-card">
+                                            <img src="${p.image_path || 'images/default.jpg'}" alt="${p.name || 'Product'}">
+                                            <h3>${p.name || 'Unnamed Product'}</h3>
+                                            <p>${p.description || 'No description'}</p>
+                                            <p class="price">₹${p.price ? p.price.toFixed(2) : '0.00'}</p>
+                                            <div class="product-actions">
+                                                <button class="buy-now-btn" data-id="${p.id || 0}">Buy Now</button>
+                                                <button class="add-to-cart-btn" data-id="${p.id || 0}">Add to Cart</button>
+                                            </div>
+                                        </div>
+                                    `).join('');
+
+                                    document.querySelectorAll('.buy-now-btn').forEach(button => {
+                                        button.addEventListener('click', async function() {
+                                            const isAuthenticated = await checkAuthStatus();
+                                            if (!isAuthenticated) {
+                                                alert('Please login to buy items!');
+                                                window.location.href = '/login.html';
+                                                return;
+                                            }
+                                            productId = this.getAttribute('data-id');
+                                            loadProduct(productId);
+                                        });
+                                    });
+
+                                    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                                        button.addEventListener('click', async function() {
+                                            const isAuthenticated = await checkAuthStatus();
+                                            if (!isAuthenticated) {
+                                                alert('Please login to add items to cart!');
+                                                window.location.href = '/login.html';
+                                                return;
+                                            }
+                                            const productId = this.getAttribute('data-id');
+                                            fetch('/api/cart/update', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ product_id: productId, action: 'increase' }),
+                                                credentials: 'include'
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.success) alert('Added to cart!');
+                                                else alert(data.error || 'Failed to add to cart.');
+                                            })
+                                            .catch(error => console.error('Error adding to cart:', error));
+                                        });
+                                    });
+                                })
+                                .catch(error => console.error('Error fetching related products:', error));
+                        }
+                    })
+                    .catch(error => console.error('Error fetching product:', error));
+            }
+
+            async function loadCartForCheckout() {
+                const isAuthenticated = await checkAuthStatus();
+                if (!isAuthenticated) {
+                    alert('Please login to proceed with checkout!');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                fetch('/api/cart', { credentials: 'include' })
+                    .then(response => response.json())
+                    .then(cart => {
+                        const container = document.getElementById('selected-product');
+                        let subtotal = 0;
+                        if (cart.length === 0) {
+                            container.innerHTML = '<p>Your cart is empty</p>';
+                            updateSummary(0);
+                            return;
+                        }
+                        container.innerHTML = cart.map(item => {
+                            subtotal += item.price * item.quantity;
+                            return `
+                                <div class="checkout-item selected-product">
+                                    <img src="${item.image_path}" alt="${item.name}">
+                                    <div class="item-details">
+                                        <h3>${item.name}</h3>
+                                        <p>₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        updateSummary(subtotal);
+                    })
+                    .catch(error => console.error('Error loading cart:', error));
+            }
+
+            if (productId) {
+                loadProduct(productId);
+            } else {
+                loadCartForCheckout();
+            }
+
+            document.getElementById('place-order-btn').addEventListener('click', async () => {
+                const isAuthenticated = await checkAuthStatus();
+                if (!isAuthenticated) {
+                    alert('Please login to proceed to payment!');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                if (productId) {
+                    window.location.href = `payment.html?product=${productId}`;
+                } else {
+                    window.location.href = `payment.html`;
+                }
+            });
+
+            function updateSummary(subtotal) {
+                const shipping = 100.00;
+                document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+                document.getElementById('total').textContent = `₹${(subtotal + shipping).toFixed(2)}`;
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9325d15b7f2c7221',t:'MTc0NDk5NjY2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
