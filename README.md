@@ -13,14 +13,14 @@ I implemented features typically found in real-world e-commerce platforms, inclu
 - Shopping cart functionality
 - Checkout process with order storage
 - Admin dashboard for managing products (optional)
-- 
+  
 ## 🛠️ Tech Stack
 
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend**: Node.js, Express.js
 - **Database**: MySQL
 - **Tools**: Git, GitHub, XAMPP (MySQL server)
-- 
+  
 ## 📁 Folder Structure
 
 mini-project/
@@ -55,11 +55,11 @@ node server.js
 Open frontend/index.html directly in a browser
 Or access via backend server at: http://localhost:3000
 ## 📸 Key Features
-> Mobile-friendly UI and product filtering
-> User session management
-> Secure login & registration
-> Dynamic product rendering from MySQL
-> Order history saved per user
+> Mobile-friendly UI and product filtering,
+> User session management,
+> Secure login & registration,
+> Dynamic product rendering from MySQL,
+> Order history saved per user and
 > Optional admin panel
 ## 📬 Contact
 If you'd like to know more about this project or collaborate:
