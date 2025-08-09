@@ -65,4 +65,17 @@ Or access via backend server at: http://localhost:3000
 If you'd like to know more about this project or collaborate:
 GitHub: @SHYAMESH-KOMATLA
 Email: shyameshkomatla@example.com
+# Project Images
+**Homepage**
+![Image 1](readme_images/image0.png)
+![Image 2](readme_images/image1.png)
+**Login Page**
+![Image 3](readme_images/image2.png)
+**Products Page**
+![Image 1](readme_images/image3.png)
+**checkouts Page**
+![Image 2](readme_images/image4.png)
+**Payments Page**
+![Image 3](readme_images/image5.png)
+
 
